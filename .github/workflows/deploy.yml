@@ -1,0 +1,32 @@
+name: Deploy to Docker Hub
+
+# Kích hoạt quy trình khi có code mới đẩy lên nhánh main
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build_and_push:
+    # Mượn máy ảo Ubuntu của GitHub để chạy
+    runs-on: ubuntu-latest
+
+    steps:
+      # Action 1: Robot tự động lấy code từ Github vào máy ảo
+      - name: Bước 1 - Checkout mã nguồn
+        uses: actions/checkout@v6.0.2
+
+      # Action 2: Tự động đăng nhập Docker Hub bằng 2 biến Secrets bạn vừa tạo
+      - name: Bước 2 - Đăng nhập Docker Hub
+        uses: docker/login-action@v4.0.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Action 3: Đọc Dockerfile, đóng gói ứng dụng và đẩy lên Docker Hub
+      - name: Bước 3 - Build và Push Image
+        uses: docker/build-push-action@v7.0.0
+        with:
+          context: .
+          push: true
+          # Đặt tên cho Image. Thay 'demo-app' bằng tên bạn muốn.
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app:latest
